@@ -1,0 +1,517 @@
+/* ============================================================
+   POWERX ENGINEERING LTD — script.js
+   Full interactivity, animations, and functionality
+   ============================================================ */
+
+'use strict';
+
+/* ─── LOADER ─────────────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    if (loader) {
+      loader.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  }, 2400);
+  document.body.style.overflow = 'hidden';
+});
+
+/* ─── AOS INIT ───────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  AOS.init({
+    duration: 750,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 60,
+  });
+
+  initNavbar();
+  initHamburger();
+  initParticles();
+  initSmoothScroll();
+  initCounters();
+  initProjectFilters();
+  initContactForm();
+  initBackToTop();
+});
+
+/* ─── NAVBAR ─────────────────────────────────────────────────── */
+function initNavbar() {
+  const navbar = document.getElementById('navbar');
+  let lastScroll = 0;
+
+  window.addEventListener('scroll', () => {
+    const curr = window.scrollY;
+
+    // Scrolled style
+    if (curr > 60) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+
+    // Active nav link
+    const sections = document.querySelectorAll('section[id]');
+    sections.forEach(section => {
+      const top = section.offsetTop - 100;
+      const bottom = top + section.offsetHeight;
+      if (curr >= top && curr < bottom) {
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`.nav-links a[href="#${section.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+
+    lastScroll = curr;
+  }, { passive: true });
+}
+
+/* ─── HAMBURGER MENU ─────────────────────────────────────────── */
+function initHamburger() {
+  const hamburger = document.getElementById('hamburger');
+  const navLinks  = document.getElementById('navLinks');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    navLinks.classList.toggle('open');
+    document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
+  });
+
+  // Close on link click
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      navLinks.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+}
+
+/* ─── PARTICLES ──────────────────────────────────────────────── */
+function initParticles() {
+  const container = document.getElementById('particles');
+  if (!container) return;
+
+  const count = window.innerWidth < 768 ? 18 : 35;
+
+  for (let i = 0; i < count; i++) {
+    createParticle(container);
+  }
+}
+
+function createParticle(container) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+
+  const size  = Math.random() * 3 + 1;
+  const left  = Math.random() * 100;
+  const delay = Math.random() * 12;
+  const dur   = Math.random() * 14 + 8;
+  const drift = (Math.random() - 0.5) * 80;
+
+  p.style.cssText = `
+    left: ${left}%;
+    width: ${size}px;
+    height: ${size}px;
+    animation-delay: ${delay}s;
+    animation-duration: ${dur}s;
+    --drift: ${drift}px;
+    opacity: 0;
+  `;
+
+  // Occasionally make bigger bright ones
+  if (Math.random() > 0.8) {
+    p.style.background = '#ff4444';
+    p.style.boxShadow = '0 0 6px rgba(232,0,42,0.8)';
+  }
+
+  container.appendChild(p);
+}
+
+/* ─── SMOOTH SCROLL ──────────────────────────────────────────── */
+function initSmoothScroll() {
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const target = document.querySelector(this.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+
+      const offset = 72; // navbar height
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+}
+
+/* ─── COUNTERS ───────────────────────────────────────────────── */
+function initCounters() {
+  const counters = document.querySelectorAll('.counter');
+  if (!counters.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(c => observer.observe(c));
+}
+
+function animateCounter(el) {
+  const target = parseInt(el.dataset.target, 10);
+  const duration = 2200;
+  const step = 16;
+  const increment = target / (duration / step);
+  let current = 0;
+
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) {
+      el.textContent = target;
+      clearInterval(timer);
+    } else {
+      el.textContent = Math.floor(current);
+    }
+  }, step);
+}
+
+/* ─── PROJECT FILTERS ────────────────────────────────────────── */
+function initProjectFilters() {
+  const buttons = document.querySelectorAll('.pf-btn');
+  const cards   = document.querySelectorAll('.project-card');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Update active button
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filter = btn.dataset.filter;
+
+      cards.forEach(card => {
+        if (filter === 'all' || card.dataset.category === filter) {
+          card.style.display = '';
+          card.style.animation = 'none';
+          requestAnimationFrame(() => {
+            card.style.animation = 'fadeInCard 0.4s ease forwards';
+          });
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Inject keyframe if not present
+  if (!document.getElementById('filterKF')) {
+    const style = document.createElement('style');
+    style.id = 'filterKF';
+    style.textContent = `
+      @keyframes fadeInCard {
+        from { opacity:0; transform:scale(0.94); }
+        to   { opacity:1; transform:scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+/* ─── CONTACT FORM ───────────────────────────────────────────── */
+function initContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const btn = form.querySelector('button[type="submit"]');
+    const origHTML = btn.innerHTML;
+
+    // Loading state
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+    btn.disabled = true;
+    btn.style.opacity = '0.8';
+
+    // Simulate submission
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Message Sent Successfully!';
+      btn.style.background = '#16a34a';
+      btn.style.borderColor = '#16a34a';
+
+      setTimeout(() => {
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        form.reset();
+      }, 3500);
+    }, 2000);
+  });
+}
+
+/* ─── BACK TO TOP ────────────────────────────────────────────── */
+function initBackToTop() {
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ─── PARALLAX HERO ──────────────────────────────────────────── */
+(function initHeroParallax() {
+  const heroImg = document.querySelector('.hero-img');
+  if (!heroImg || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (y < window.innerHeight) {
+          heroImg.style.transform = `translateY(${y * 0.25}px) scale(1.06)`;
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+
+/* ─── SERVICE CARD TILT ──────────────────────────────────────── */
+(function initCardTilt() {
+  const cards = document.querySelectorAll('.service-card, .team-card');
+
+  cards.forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width  - 0.5) * 8;
+      const y = ((e.clientY - rect.top)  / rect.height - 0.5) * -8;
+      card.style.transform = `perspective(600px) rotateX(${y}deg) rotateY(${x}deg) translateY(-6px)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+})();
+
+/* ─── TYPING EFFECT – HERO BADGE ─────────────────────────────── */
+(function initTypeEffect() {
+  const el = document.querySelector('.hero-badge');
+  if (!el) return;
+
+  const texts = [
+    'ISO 9001 Certified Engineering Excellence',
+    'Trusted by 500+ Industrial Clients',
+    '18 Years of Engineering Leadership',
+    'Delivering Power Across 40+ Countries',
+  ];
+
+  let idx = 0;
+  let charIdx = 0;
+  let deleting = false;
+  let pause = false;
+  const icon = '<i class="fa-solid fa-bolt"></i> ';
+
+  function type() {
+    if (pause) return;
+    const current = texts[idx];
+
+    if (!deleting) {
+      charIdx++;
+      el.innerHTML = icon + current.substring(0, charIdx);
+      if (charIdx === current.length) {
+        deleting = true;
+        setTimeout(type, 2800);
+        return;
+      }
+    } else {
+      charIdx--;
+      el.innerHTML = icon + current.substring(0, charIdx);
+      if (charIdx === 0) {
+        deleting = false;
+        idx = (idx + 1) % texts.length;
+        setTimeout(type, 400);
+        return;
+      }
+    }
+    setTimeout(type, deleting ? 30 : 55);
+  }
+
+  // Start after a short delay
+  setTimeout(type, 3200);
+})();
+
+/* ─── SECTION REVEAL LINES ───────────────────────────────────── */
+(function initRevealLines() {
+  const tags = document.querySelectorAll('.section-tag');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = 'slideTagIn 0.5s ease forwards';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  // Inject keyframe
+  const style = document.createElement('style');
+  style.textContent = `
+    .section-tag { opacity:0; transform: translateX(-10px); }
+    @keyframes slideTagIn {
+      to { opacity:1; transform: translateX(0); }
+    }
+  `;
+  document.head.appendChild(style);
+
+  tags.forEach(t => observer.observe(t));
+})();
+
+/* ─── ACTIVE NAV HIGHLIGHT ───────────────────────────────────── */
+(function initActiveNav() {
+  const style = document.createElement('style');
+  style.textContent = `
+    .nav-links a.active {
+      color: #fff !important;
+    }
+    .nav-links a.active::after {
+      transform: scaleX(1) !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+/* ─── CURSOR GLOW (desktop only) ────────────────────────────── */
+(function initCursorGlow() {
+  if (window.innerWidth < 1024) return;
+
+  const glow = document.createElement('div');
+  glow.style.cssText = `
+    position: fixed;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,0,42,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+    will-change: transform;
+  `;
+  document.body.appendChild(glow);
+
+  let mx = 0, my = 0, cx = 0, cy = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX;
+    my = e.clientY;
+  });
+
+  function animGlow() {
+    cx += (mx - cx) * 0.08;
+    cy += (my - cy) * 0.08;
+    glow.style.left = cx + 'px';
+    glow.style.top  = cy + 'px';
+    requestAnimationFrame(animGlow);
+  }
+  animGlow();
+
+  document.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
+  document.addEventListener('mouseenter', () => { glow.style.opacity = '1'; });
+})();
+
+/* ─── STATS HOVER GLOW ───────────────────────────────────────── */
+(function initStatsHover() {
+  document.querySelectorAll('.counter-item').forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      item.style.boxShadow = '0 0 24px rgba(232,0,42,0.2)';
+    });
+    item.addEventListener('mouseleave', () => {
+      item.style.boxShadow = '';
+    });
+  });
+})();
+
+/* ─── HERO SCROLL PROGRESS ───────────────────────────────────── */
+(function initScrollProgress() {
+  const bar = document.createElement('div');
+  bar.style.cssText = `
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, #e8002a, #ff6666);
+    z-index: 2000; width: 0%;
+    transition: width 0.1s linear;
+    pointer-events: none;
+  `;
+  document.body.appendChild(bar);
+
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    bar.style.width = Math.min(pct, 100) + '%';
+  }, { passive: true });
+})();
+
+/* ─── GLITCH EFFECT ON LOGO HOVER ───────────────────────────── */
+(function initLogoGlitch() {
+  const logo = document.querySelector('.nav-logo');
+  if (!logo) return;
+
+  logo.addEventListener('mouseenter', () => {
+    logo.style.animation = 'glitchLogo 0.4s steps(2, end)';
+  });
+  logo.addEventListener('animationend', () => {
+    logo.style.animation = '';
+  });
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes glitchLogo {
+      0%   { text-shadow: 2px 0 red, -2px 0 cyan; }
+      25%  { text-shadow: -2px 0 red, 2px 0 cyan; clip-path: inset(20% 0 40% 0); }
+      50%  { text-shadow: 2px 2px red, -2px -2px cyan; }
+      75%  { text-shadow: -1px 0 red, 1px 0 cyan; clip-path: inset(60% 0 10% 0); }
+      100% { text-shadow: none; clip-path: none; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+/* ─── NEWSLETTER FORM ────────────────────────────────────────── */
+(function initNewsletter() {
+  const form = document.querySelector('.newsletter-form');
+  if (!form) return;
+
+  form.querySelector('button').addEventListener('click', () => {
+    const input = form.querySelector('input');
+    if (!input.value || !input.value.includes('@')) return;
+
+    const btn = form.querySelector('button');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    btn.style.background = '#16a34a';
+    input.value = '';
+
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i>';
+      btn.style.background = '';
+    }, 3000);
+  });
+})();
+
+console.log('%cPowerX Engineering Ltd', 'color:#e8002a;font-size:20px;font-weight:bold;');
+console.log('%cPowering The Future With Engineering Excellence', 'color:#7e8ea8;font-size:12px;');
+
