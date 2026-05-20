@@ -1,0 +1,38 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border m-0 p-0;
+  }
+  
+  body {
+    @apply font-sans bg-cream text-ink;
+  }
+  
+  ::selection {
+    @apply bg-gold/30;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gold text-ink px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200 hover:bg-gold2 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-transparent text-white px-6 py-3 rounded-lg font-medium text-sm border-2 border-white/20 transition-all duration-200 hover:border-white/50 hover:bg-white/5;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border-2 border-cream3 rounded-lg text-sm font-sans text-ink bg-cream transition-all duration-200 focus:border-gold focus:bg-white focus:outline-none;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl border border-cream3 transition-all duration-200 hover:shadow-lg hover:border-gold;
+  }
+}

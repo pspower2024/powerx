@@ -1,0 +1,53 @@
+ai-resume-builder/
+├── package.json
+├── vite.config.js
+├── index.html
+├── tailwind.config.js
+├── postcss.config.js
+├── .env.example
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    ├── index.css
+    ├── components/
+    │   ├── Layout/
+    │   │   ├── Navbar.jsx
+    │   │   └── Footer.jsx
+    │   ├── Landing/
+    │   │   ├── Hero.jsx
+    │   │   ├── Features.jsx
+    │   │   ├── HowItWorks.jsx
+    │   │   ├── TemplatesShowcase.jsx
+    │   │   └── CTASection.jsx
+    │   ├── Builder/
+    │   │   ├── BuilderLayout.jsx
+    │   │   ├── FormPanel.jsx
+    │   │   ├── PreviewPanel.jsx
+    │   │   ├── PersonalInfoForm.jsx
+    │   │   ├── ExperienceForm.jsx
+    │   │   ├── EducationForm.jsx
+    │   │   ├── SkillsForm.jsx
+    │   │   ├── AITools.jsx
+    │   │   └── TemplateSelector.jsx
+    │   ├── ResumeTemplates/
+    │   │   ├── ModernTemplate.jsx
+    │   │   ├── ClassicTemplate.jsx
+    │   │   └── MinimalTemplate.jsx
+    │   ├── UI/
+    │   │   ├── Toast.jsx
+    │   │   ├── Modal.jsx
+    │   │   ├── Spinner.jsx
+    │   │   └── TabBar.jsx
+    │   └── PDF/
+    │       └── PDFExport.jsx
+    ├── hooks/
+    │   ├── useAI.js
+    │   ├── useForm.js
+    │   └── useToast.js
+    ├── services/
+    │   └── aiService.js
+    ├── utils/
+    │   ├── constants.js
+    │   └── helpers.js
+    └── styles/
+        └── globals.css
